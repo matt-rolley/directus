@@ -17,6 +17,10 @@ import { getConfigFromEnv } from '../utils/get-config-from-env.js';
 import { validateEnv } from '../utils/validate-env.js';
 import { getHelpers } from './helpers/index.js';
 
+// TODO: Not sure where these best go, added her to test
+import Client_SQLite3 from "knex/lib/dialects/sqlite3/index.js";
+import LibSql from "@libsql/sqlite3";
+
 let database: Knex | null = null;
 let inspector: SchemaInspector | null = null;
 let databaseVersion: string | null = null;
@@ -112,6 +116,19 @@ export function getDatabase(): Knex {
 
 	if (client === 'sqlite3') {
 		knexConfig.useNullAsDefault = true;
+		
+		const useLibsql = connectionConfig['filename']?.startsWith("libsql://");
+		
+		if (useLibsql) {
+
+			class Client_Libsql extends Client_SQLite3 {
+					_driver() {
+							return LibSql
+					}
+			}
+
+			knexConfig.client = Client_Libsql as any;
+		}
 
 		poolConfig.afterCreate = async (conn: any, callback: any) => {
 			logger.trace('Enabling SQLite Foreign Keys support...');
@@ -237,6 +254,7 @@ export function getDatabaseClient(database?: Knex): DatabaseClient {
 		case 'Client_CockroachDB':
 			return 'cockroachdb';
 		case 'Client_SQLite3':
+		case 'Client_Libsql':
 			return 'sqlite';
 		case 'Client_Oracledb':
 		case 'Client_Oracle':

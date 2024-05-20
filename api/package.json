@@ -227,6 +227,7 @@
 		"oracledb": "6.5.0",
 		"pg": "8.11.5",
 		"sqlite3": "5.1.7",
+		"@libsql/sqlite3": "^0.3.1",
 		"tedious": "18.2.0"
 	},
 	"engines": {
